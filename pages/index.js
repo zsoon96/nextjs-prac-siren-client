@@ -18,12 +18,14 @@ export default function Home() {
 
                 <dl className="row mt-3">
                     <dt className="col-sm-3">
-                        <input type='checkbox' className='mr-2'/>에스프레소
+                        <input type='checkbox' className='mr-2' id='espresso'/>
+                        <label htmlFor='espresso'>에스프레소</label>
                     </dt>
                     <dd className="col-sm-9">2,900원</dd>
 
                     <dt className="col-sm-3">
-                        <input type='checkbox' className='mr-2'/>아메리카노
+                        <input type='checkbox' className='mr-2' id='americano'/>
+                        <label htmlFor='americano'>아메리카노</label>
                     </dt>
                     <dd className="col-sm-9">3,400원</dd>
                 </dl>
