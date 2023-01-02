@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import {Formik} from "formik";
 
 export default function Home() {
     return (
@@ -12,25 +13,57 @@ export default function Home() {
             <div className='container'>
                 <h1 className='mt-4 font-bold text-2xl'>커피 주문</h1>
 
-                <div className='mt-3'>
-                    <input type='text' className='form-control' placeholder='이름을 입력해주세요.'/>
-                </div>
+                <Formik
+                    initialValues={{
+                        name: ''
+                    }}
+                    validate={(values) => {
+                        const errors = {}
+                        if (!values.name) {
+                            errors.name = '이름을 입력해주세요.'
+                        }
+                        return errors
+                    }}
+                    onSubmit={(values) => {
+                        console.log(values)
+                    }}>
+                    {({
+                          values,
+                          errors,
+                          touched,
+                          handleChange,
+                          handleBlur,
+                          handleSubmit
+                      }) => (
+                        <form onSubmit={handleSubmit}>
+                            <div className='mt-3'>
+                                <input type='text' className='form-control'
+                                       name='name'
+                                       value={values.name}
+                                       onChange={handleChange}
+                                       onBlur={handleBlur}
+                                       placeholder='이름을 입력해주세요.'/>
+                                {errors.name && touched.name && <p className='text-danger'>{errors.name}</p>}
+                            </div>
 
-                <dl className="row mt-3">
-                    <dt className="col-sm-3">
-                        <input type='checkbox' className='mr-2' id='espresso'/>
-                        <label htmlFor='espresso'>에스프레소</label>
-                    </dt>
-                    <dd className="col-sm-9">2,900원</dd>
+                            <dl className="row mt-3">
+                                <dt className="col-sm-3">
+                                    <input type='checkbox' className='mr-2' id='espresso'/>
+                                    <label htmlFor='espresso'>에스프레소</label>
+                                </dt>
+                                <dd className="col-sm-9">2,900원</dd>
 
-                    <dt className="col-sm-3">
-                        <input type='checkbox' className='mr-2' id='americano'/>
-                        <label htmlFor='americano'>아메리카노</label>
-                    </dt>
-                    <dd className="col-sm-9">3,400원</dd>
-                </dl>
+                                <dt className="col-sm-3">
+                                    <input type='checkbox' className='mr-2' id='americano'/>
+                                    <label htmlFor='americano'>아메리카노</label>
+                                </dt>
+                                <dd className="col-sm-9">3,400원</dd>
+                            </dl>
 
-                <button className='btn btn-primary btn-lg mt-4'>주문</button>
+                            <button type='submit' className='btn btn-primary btn-lg mt-4'>주문</button>
+                        </form>
+                    )}
+                </Formik>
             </div>
         </div>
     )
