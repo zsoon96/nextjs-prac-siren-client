@@ -1,7 +1,16 @@
 import Head from 'next/head'
 import {Formik} from "formik";
+import {Fragment, useState} from "react"
+
+const formatter = Intl.NumberFormat('ko-kr');
+
+const menu = [
+    {name: '에스프레소', price: 2900},
+    {name: '아메리카노', price: 3200}
+]
 
 export default function Home() {
+    const [items, setItems] = useState([])
     return (
         <div className='container'>
             <Head>
@@ -47,20 +56,36 @@ export default function Home() {
                             </div>
 
                             <dl className="row mt-3">
-                                <dt className="col-sm-3">
-                                    <input type='checkbox' className='mr-2' id='espresso'/>
-                                    <label htmlFor='espresso'>에스프레소</label>
-                                </dt>
-                                <dd className="col-sm-9">2,900원</dd>
-
-                                <dt className="col-sm-3">
-                                    <input type='checkbox' className='mr-2' id='americano'/>
-                                    <label htmlFor='americano'>아메리카노</label>
-                                </dt>
-                                <dd className="col-sm-9">3,400원</dd>
+                                {menu.map(item => (
+                                    <Fragment key = {item.name}>
+                                        <dt className="col-sm-3">
+                                            <label htmlFor='americano'>{item.name}</label>
+                                        </dt>
+                                        <dd className="col-sm-9">
+                                            <div>
+                                                {formatter.format(item.price)}원
+                                            </div>
+                                            <div className='mt-1 mb-3'>
+                                                <button type='button' className='btn btn-outline-secondary btn-sm mt-1'>담기</button>
+                                            </div>
+                                            </dd>
+                                    </Fragment>
+                                ))}
                             </dl>
 
-                            <button type='submit' className='btn btn-primary btn-lg mt-4'>주문</button>
+                            <hr/>
+
+                            <h2 className='mt-4 mb-2 font-bold text-xl'>주문서</h2>
+                            {/* 담은 메뉴가 있을 경우 */}
+                            {items.length > 0 && (
+                                <><p>주문 목록</p></>
+                            )}
+                            {/* 담은 메뉴가 없을 경우 */}
+                            {!items.length && (
+                                <><p>주문하실 메뉴를 담아주세요!</p></>
+                            )}
+
+                            <button type='submit' className='btn btn-info btn-lg mt-4'>주문</button>
                         </form>
                     )}
                 </Formik>
