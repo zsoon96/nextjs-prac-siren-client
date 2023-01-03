@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import {Formik} from "formik";
-import {Fragment, useState} from "react"
+import {Fragment, useCallback, useState} from "react"
 
 const formatter = Intl.NumberFormat('ko-kr');
 
@@ -11,6 +11,11 @@ const menu = [
 
 export default function Home() {
     const [items, setItems] = useState([])
+    const addItem = useCallback((name) => {
+        // 파라미터로 받은 name으로 menu 리스트에 있는 item.name과 같은 값만 추출해서 setItems에 담아줌
+        const item = menu.find(item => name === item.name)
+        setItems([...items, item])
+    }, [items] )
     return (
         <div className='container'>
             <Head>
@@ -66,7 +71,7 @@ export default function Home() {
                                                 {formatter.format(item.price)}원
                                             </div>
                                             <div className='mt-1 mb-3'>
-                                                <button type='button' className='btn btn-outline-secondary btn-sm mt-1'>담기</button>
+                                                <button type='button' className='btn btn-outline-secondary btn-sm mt-1' onClick={() => addItem(item.name)}>담기</button>
                                             </div>
                                             </dd>
                                     </Fragment>
@@ -78,7 +83,14 @@ export default function Home() {
                             <h2 className='mt-4 mb-2 font-bold text-xl'>주문서</h2>
                             {/* 담은 메뉴가 있을 경우 */}
                             {items.length > 0 && (
-                                <><p>주문 목록</p></>
+                                <dl>
+                                    {items.map(item => (
+                                        <Fragment key ={item.name}>
+                                            <dt>{item.name}</dt>
+                                            <dd>{formatter.format(item.price)}</dd>
+                                        </Fragment>
+                                    ))}
+                                </dl>
                             )}
                             {/* 담은 메뉴가 없을 경우 */}
                             {!items.length && (
