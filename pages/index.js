@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import {Formik} from "formik";
 import {Fragment, useCallback, useState} from "react"
+import produce from 'immer'
 
 const formatter = Intl.NumberFormat('ko-kr');
 
@@ -10,12 +11,20 @@ const menu = [
 ]
 
 export default function Home() {
-    const [items, setItems] = useState([])
+    const [items, setItems] = useState(menu.map(item => ({...item, count: 0})))
+
     const addItem = useCallback((name) => {
         // 파라미터로 받은 name으로 menu 리스트에 있는 item.name과 같은 값만 추출해서 setItems에 담아줌
-        const item = menu.find(item => name === item.name)
-        setItems([...items, item])
-    }, [items] )
+        // const item = menu.find(item => name === item.name)
+        // setItems([...items, item])
+
+        // immer를 활용하여 count 데이터의 불변성 유지
+        // immer: 객체구조가 깊어질 경우, 간단하게 불변성을 유지하며 업데이트해 줄 수 있는 라이브러리
+        setItems(produce(items, draft => {
+            const index = items.findIndex(item => item.name === name)
+            draft[index].count++
+        }))
+    }, [items])
     return (
         <div className='container'>
             <Head>
@@ -62,7 +71,7 @@ export default function Home() {
 
                             <dl className="row mt-3">
                                 {menu.map(item => (
-                                    <Fragment key = {item.name}>
+                                    <Fragment key={item.name}>
                                         <dt className="col-sm-3">
                                             <label htmlFor='americano'>{item.name}</label>
                                         </dt>
@@ -71,9 +80,11 @@ export default function Home() {
                                                 {formatter.format(item.price)}원
                                             </div>
                                             <div className='mt-1 mb-3'>
-                                                <button type='button' className='btn btn-outline-secondary btn-sm mt-1' onClick={() => addItem(item.name)}>담기</button>
+                                                <button type='button' className='btn btn-outline-secondary btn-sm mt-1'
+                                                        onClick={() => addItem(item.name)}>담기
+                                                </button>
                                             </div>
-                                            </dd>
+                                        </dd>
                                     </Fragment>
                                 ))}
                             </dl>
@@ -81,21 +92,15 @@ export default function Home() {
                             <hr/>
 
                             <h2 className='mt-4 mb-2 font-bold text-xl'>주문서</h2>
-                            {/* 담은 메뉴가 있을 경우 */}
-                            {items.length > 0 && (
-                                <dl>
-                                    {items.map(item => (
-                                        <Fragment key ={item.name}>
-                                            <dt>{item.name}</dt>
-                                            <dd>{formatter.format(item.price)}</dd>
-                                        </Fragment>
-                                    ))}
-                                </dl>
-                            )}
-                            {/* 담은 메뉴가 없을 경우 */}
-                            {!items.length && (
-                                <><p>주문하실 메뉴를 담아주세요!</p></>
-                            )}
+
+                            <dl>
+                                {items.map(item => (
+                                    <Fragment key={item.name} >
+                                        <dt>{item.name} &times; {item.count}</dt>
+                                        <dd>{formatter.format(item.price)}</dd>
+                                    </Fragment>
+                                ))}
+                            </dl>
 
                             <button type='submit' className='btn btn-info btn-lg mt-4'>주문</button>
                         </form>
