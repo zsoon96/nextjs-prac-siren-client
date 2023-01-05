@@ -10,6 +10,15 @@ const menu = [
     {name: '아메리카노', price: 3200}
 ]
 
+// 합계 산출 함수
+// you might not need/lodash > lodash에서 제공하는 sum함수를 js로 변환한 코드 활용
+const sum = (array) => {
+    return array.reduce((acc, num) => {
+        acc += num
+        return acc
+    }, 0)
+}
+
 export default function Home() {
     const [items, setItems] = useState(menu.map(item => ({...item, count: 0})))
 
@@ -25,6 +34,16 @@ export default function Home() {
             draft[index].count++
         }))
     }, [items])
+
+    const removeItem = useCallback((name) => {
+        setItems(produce(items, draft => {
+            const index = items.findIndex(item => item.name === name)
+            if (draft[index].count > 0) {
+                draft[index].count--;
+            }
+        }))
+    }, [items])
+
     return (
         <div className='container'>
             <Head>
@@ -66,7 +85,7 @@ export default function Home() {
                                        onChange={handleChange}
                                        onBlur={handleBlur}
                                        placeholder='이름을 입력해주세요.'/>
-                                {errors.name && touched.name && <p className='text-danger'>{errors.name}</p>}
+                                {errors.name && touched.name && <p className='text-danger text-xs mt-1'>{errors.name}</p>}
                             </div>
 
                             <dl className="row mt-3">
@@ -75,11 +94,11 @@ export default function Home() {
                                         <dt className="col-sm-3">
                                             <label htmlFor='americano'>{item.name}</label>
                                         </dt>
-                                        <dd className="col-sm-9">
+                                        <dd className="col-sm-9 flex justify-between">
                                             <div>
                                                 {formatter.format(item.price)}원
                                             </div>
-                                            <div className='mt-1 mb-3'>
+                                            <div>
                                                 <button type='button' className='btn btn-outline-secondary btn-sm mt-1'
                                                         onClick={() => addItem(item.name)}>담기
                                                 </button>
@@ -89,20 +108,33 @@ export default function Home() {
                                 ))}
                             </dl>
 
-                            <hr/>
+                            <hr className='mt-2 mb-3'/>
 
-                            <h2 className='mt-4 mb-2 font-bold text-xl'>주문서</h2>
+                            <h2 className='mb-2 font-bold text-xl'>주문서</h2>
 
                             <dl>
                                 {items.map(item => (
-                                    <Fragment key={item.name} >
+                                    <Fragment key={item.name}>
                                         <dt>{item.name} &times; {item.count}</dt>
-                                        <dd>{formatter.format(item.price)}</dd>
+                                        <dd className='flex justify-between'>
+                                            <div>
+                                                {formatter.format(item.price)}
+                                            </div>
+                                            <div>
+                                                <button type='button' className='btn btn-outline-secondary btn-sm mt-1'
+                                                        onClick={() => removeItem(item.name)}>빼기
+                                                </button>
+                                            </div>
+                                        </dd>
                                     </Fragment>
                                 ))}
                             </dl>
 
-                            <button type='submit' className='btn btn-info btn-lg mt-4'>주문</button>
+                            <div>
+                                합계: {formatter.format(sum(items.map(item => item.price * item.count)))}
+                            </div>
+
+                            <button type='submit' className='btn btn-info btn-lg mt-3'>주문</button>
                         </form>
                     )}
                 </Formik>
