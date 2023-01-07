@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import {Formik} from "formik";
-import {Fragment, useCallback, useState} from "react"
+import {Fragment, useCallback, useMemo, useState} from "react"
 import produce from 'immer'
 
 const formatter = Intl.NumberFormat('ko-kr');
@@ -44,6 +44,11 @@ export default function Home() {
         }))
     }, [items])
 
+    // 합계 금액 변수화
+    const total = useMemo(() => {
+        return sum(items.map(item => item.price * item.count))
+    }, [items])
+
     return (
         <div className='container'>
             <Head>
@@ -63,6 +68,9 @@ export default function Home() {
                         const errors = {}
                         if (!values.name) {
                             errors.name = '이름을 입력해주세요.'
+                        }
+                        if (total === 0) {
+                            errors.total = '한 개 이상 상품을 담아주세요.'
                         }
                         return errors
                     }}
@@ -131,10 +139,11 @@ export default function Home() {
                             </dl>
 
                             <div>
-                                합계: {formatter.format(sum(items.map(item => item.price * item.count)))}
+                                합계: {formatter.format(total)}
                             </div>
+                            {errors.total && (<p className='text-danger text-xs mt-1'>{errors.total}</p>)}
 
-                            <button type='submit' className='btn btn-info btn-lg mt-3'>주문</button>
+                            <button type='submit' className='btn btn-info btn-ml mt-3'>주문</button>
                         </form>
                     )}
                 </Formik>
