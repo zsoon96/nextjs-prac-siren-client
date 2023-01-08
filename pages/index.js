@@ -2,6 +2,8 @@ import Head from 'next/head'
 import {Formik} from "formik";
 import {Fragment, useCallback, useMemo, useState} from "react"
 import produce from 'immer'
+import {addDoc, collection, getFirestore} from 'firebase/firestore'
+import firebaseApp from "../net/firebaseApp";
 
 const formatter = Intl.NumberFormat('ko-kr');
 
@@ -18,6 +20,11 @@ const sum = (array) => {
         return acc
     }, 0)
 }
+
+// firebase database 연결
+const firebaseDb = getFirestore(firebaseApp)
+// firebase database에 컬렉션 생성
+const orders = collection(firebaseDb, 'orders')
 
 export default function Home() {
     const [items, setItems] = useState(menu.map(item => ({...item, count: 0})))
@@ -75,7 +82,19 @@ export default function Home() {
                         return errors
                     }}
                     onSubmit={(values) => {
-                        console.log(values)
+                        // 주문 시 필요한 order 데이터
+                        const order = {
+                            // 주문자 이름
+                            ...values,
+                            // 상품 정보 (메뉴명, 가격, 수량)
+                            items,
+                            status: '주문 완료',
+                            createdAt: new Date()
+                        }
+
+                        // firebase database에 저장
+                        // 저장 후, _key.path.segments[1] = 데이터 키값 추출
+                        addDoc(orders, order).then(result => console.log(result._key.path.segments[1])).catch(console.warn)
                     }}>
                     {({
                           values,
