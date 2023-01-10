@@ -1,8 +1,8 @@
 import Head from 'next/head'
 import {Formik} from "formik";
-import {Fragment, useCallback, useMemo, useState} from "react"
+import {Fragment, useCallback, useEffect, useMemo, useState} from "react"
 import produce from 'immer'
-import {addDoc, collection, getFirestore, doc, getDoc} from 'firebase/firestore'
+import {addDoc, collection, getFirestore, doc, getDoc, onSnapshot} from 'firebase/firestore'
 import firebaseApp from "../net/firebaseApp";
 
 const formatter = Intl.NumberFormat('ko-kr');
@@ -28,7 +28,8 @@ const orders = collection(firebaseDb, 'orders')
 
 export default function Home() {
     const [items, setItems] = useState(menu.map(item => ({...item, count: 0}))),
-        [order, setOrder] = useState(null)
+        [order, setOrder] = useState(null),
+        [orderId, setOrderId] = useState(null)
 
     const addItem = useCallback((name) => {
         // 파라미터로 받은 name으로 menu 리스트에 있는 item.name과 같은 값만 추출해서 setItems에 담아줌
@@ -56,6 +57,15 @@ export default function Home() {
     const total = useMemo(() => {
         return sum(items.map(item => item.price * item.count))
     }, [items])
+
+    useEffect(() => {
+        if (orderId) {
+            // 데이터 변경 사항 모니터링해서 실시간으로 업데이트
+            return onSnapshot(doc(firebaseDb, 'orders', orderId), doc => {
+                setOrder(doc.data())
+            })
+        }
+    },[orderId])
 
     return (
         <div className='container'>
@@ -97,12 +107,13 @@ export default function Home() {
                         // 저장 후, _key.path.segments[1] = 데이터 키값 추출
                         const result = await addDoc(orders, order)
                         const id = result._key.path.segments[1]
-                        const docRef = doc(firebaseDb, 'orders', id)
-                        const orderDoc = await getDoc(docRef)
-                        const data = orderDoc.data()
-                        setOrder({
-                            id, ...data
-                        })
+                        setOrderId(id)
+                        // const docRef = doc(firebaseDb, 'orders', id)
+                        // const orderDoc = await getDoc(docRef)
+                        // const data = orderDoc.data()
+                        // setOrder({
+                        //     id, ...data
+                        // })
                     }}>
                     {({
                           values,
@@ -172,7 +183,7 @@ export default function Home() {
                             {errors.total && (<p className='text-danger text-xs mt-1'>{errors.total}</p>)}
 
                             {!order && (<button type='submit' className='btn btn-info btn-ml mt-3'>주문</button>)}
-                            {order && (<p>주문 상태: <span className='text-secondary mt-3'>{order.status}</span></p>)}
+                            {order && (<p className='mt-3'>주문 상태: <span className='text-secondary'>{order.status}</span></p>)}
 
                         </form>
                     )}
