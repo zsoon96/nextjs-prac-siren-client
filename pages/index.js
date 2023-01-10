@@ -31,6 +31,36 @@ export default function Home() {
         [order, setOrder] = useState(null),
         [orderId, setOrderId] = useState(null)
 
+    const statusClassName = useMemo(() => {
+        switch (order?.status) {
+            case
+            '주문 완료'
+            :
+                return 'text-secondary'
+                break;
+            case
+            '제조중'
+            :
+                return 'text-info'
+                break;
+            case
+            '제조 완료'
+            :
+                return 'text-success'
+                break;
+            case
+            '픽업 완료'
+            :
+                setOrderId(null)
+                setOrder(null)
+                setItems(menu.map(item => ({...item, count: 0})))
+                return 'text-muted'
+                break;
+            default:
+                return 'text-secondary'
+        }
+    })
+
     const addItem = useCallback((name) => {
         // 파라미터로 받은 name으로 menu 리스트에 있는 item.name과 같은 값만 추출해서 setItems에 담아줌
         // const item = menu.find(item => name === item.name)
@@ -65,7 +95,7 @@ export default function Home() {
                 setOrder(doc.data())
             })
         }
-    },[orderId])
+    }, [orderId])
 
     return (
         <div className='container'>
@@ -183,7 +213,8 @@ export default function Home() {
                             {errors.total && (<p className='text-danger text-xs mt-1'>{errors.total}</p>)}
 
                             {!order && (<button type='submit' className='btn btn-info btn-ml mt-3'>주문</button>)}
-                            {order && (<p className='mt-3'>주문 상태: <span className='text-secondary'>{order.status}</span></p>)}
+                            {order && (
+                                <p className='mt-3'>주문 상태: <span className={statusClassName}>{order.status}</span></p>)}
 
                         </form>
                     )}
@@ -192,3 +223,4 @@ export default function Home() {
         </div>
     )
 }
+
